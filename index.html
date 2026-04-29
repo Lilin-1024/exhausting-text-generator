@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>力竭文字生成器</title>
+    <style>
+        body {
+            background-color: #ffffff; color: #000000;
+            font-family: 'SimHei', 'Heiti SC', 'Microsoft YaHei', sans-serif;
+            max-width: 600px; margin: 40px auto; padding: 0 20px; text-align: center;
+        }
+        h1 { font-size: 28px; font-weight: normal; margin-bottom: 30px; }
+        textarea {
+            width: 100%; height: 140px; padding: 15px; box-sizing: border-box;
+            border: 1px solid #000000; background-color: #ffffff; color: #000000;
+            font-size: 16px; font-family: inherit; resize: vertical; margin-bottom: 20px; outline: none;
+        }
+        textarea::placeholder { color: #aaaaaa; }
+        button { 
+            width: 100%; background-color: #ffffff; color: #000000; border: 1px solid #000000;
+            padding: 12px; font-size: 18px; font-family: inherit; cursor: pointer; margin-bottom: 20px; transition: 0.2s; 
+        }
+        button:hover { background-color: #f0f0f0; }
+        #outputText {
+            text-align: left; font-size: 18px; line-height: 1.8;
+            white-space: pre-wrap; word-wrap: break-word; user-select: text; margin-top: 10px;
+        }
+
+        #settingsBtn {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            opacity: 0.2; 
+            cursor: pointer;
+            transition: opacity 0.2s;
+            z-index: 100;
+            color: #000;
+        }
+        #settingsBtn:hover {
+            opacity: 0.8;
+        }
+        #settingsPanel {
+            display: none;
+            position: fixed;
+            top: 45px;
+            right: 15px;
+            background: #ffffff;
+            border: 1px solid #000000;
+            padding: 15px;
+            width: 220px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: left;
+            z-index: 100;
+        }
+        #settingsPanel h3 {
+            margin: 0 0 15px 0;
+            font-size: 16px;
+            font-weight: normal;
+            border-bottom: 1px dashed #ccc;
+            padding-bottom: 5px;
+        }
+        .param-row {
+            margin-bottom: 15px;
+        }
+        .param-row label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        .param-row input[type=range] {
+            width: 100%;
+        }
+        #closeSettingsBtn {
+            width: 100%;
+            padding: 8px;
+            font-size: 14px;
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="settingsBtn" title="调节算法参数">
+        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+    </div>
+
+    <div id="settingsPanel">
+        <h3>概率调节</h3>
+        <div class="param-row">
+            <label>倒装句 <span id="valInv">0.3</span></label>
+            <input type="range" id="paramInversion" min="0" max="1" step="0.1" value="0.3">
+        </div>
+        <div class="param-row">
+            <label>局部错位 <span id="valSwap">0.5</span></label>
+            <input type="range" id="paramSwap" min="0" max="1" step="0.1" value="0.5">
+        </div>
+        <div class="param-row">
+            <label>错误断句 <span id="valBreak">0</span></label>
+            <input type="range" id="paramBreak" min="0" max="1" step="0.1" value="0">
+        </div>
+        <button id="closeSettingsBtn">完成</button>
+    </div>
+
+    <h1>力竭文字生成器</h1>
+    
+    <textarea id="inputText" placeholder="请输入文字..."></textarea>
+    
+    <button id="generateBtn">生成</button>
+    
+    <div id="outputText"></div>
+
+    <script>
+        (function() {
+            document.getElementById('settingsBtn').onclick = function() {
+                var p = document.getElementById('settingsPanel');
+                p.style.display = p.style.display === 'none' ? 'block' : 'none';
+            };
+            document.getElementById('closeSettingsBtn').onclick = function() {
+                document.getElementById('settingsPanel').style.display = 'none';
+            };
+            function bindSlider(sliderId, valId) {
+                var slider = document.getElementById(sliderId);
+                var valDisplay = document.getElementById(valId);
+                slider.oninput = function() { valDisplay.innerText = this.value; };
+            }
+            bindSlider('paramInversion', 'valInv');
+            bindSlider('paramSwap', 'valSwap');
+            bindSlider('paramBreak', 'valBreak');
+
+            // 词库配置
+            var mortarDict =[
+                '的', '了', '吧', '呢', '啊', '呀', '哇', '吗', '哦',
+                '这', '那', '这个', '那个', '这些', '那些',
+                '是', '有', '在', '会', '能', '要', '想', '让',
+                '跟', '和', '同', '与', '被', '把', '给', 
+                '就', '却', '也', '还', '才', '又', '更', '最', '都',
+                '因为', '所以', '虽然', '但是', '如果', '那么',
+                '确实', '实在', '简直', '竟然', '居然', '肯定',
+                '出', '打', '搞', '弄', '做', '干', '看', '说', '没', '没有'
+            ];
+            var pronounsDict =['我', '你', '他', '她', '它', '我们', '你们', '他们', '咱', '自己'];
+
+            document.getElementById('generateBtn').onclick = function() {
+                var input = document.getElementById('inputText').value;
+                if (!input.trim()) {
+                    document.getElementById('outputText').innerText = '';
+                    return;
+                }
+
+                var pInversion = parseFloat(document.getElementById('paramInversion').value);
+                var pSwap = parseFloat(document.getElementById('paramSwap').value);
+                var pBreak = parseFloat(document.getElementById('paramBreak').value);
+
+                // 引号保留
+                var protectedQuotes =[];
+                var text = input.replace(/(["“”‘’'「」『』][^"“”‘’'「」『』]*["“”‘’'「」『』])/g, function(match) {
+                    protectedQuotes.push(match);
+                    return '__Q' + (protectedQuotes.length - 1) + '__'; 
+                });
+
+                // 标点替换成空格
+                text = text.replace(/[，。！？、；,.\?!;\n]/g, ' ');
+
+                // 智能分词
+                var chunks = text.split(/(__Q\d+__)/); 
+                var segments =[];
+                var segmenter = window.Intl && Intl.Segmenter ? new Intl.Segmenter('zh-CN', { granularity: 'word' }) : null;
+
+                for (var c = 0; c < chunks.length; c++) {
+                    var chunk = chunks[c];
+                    if (!chunk) continue;
+                    
+                    if (/^__Q\d+__$/.test(chunk)) {
+                        segments.push(chunk);
+                    } else {
+                        if (segmenter) {
+                            var iterator = segmenter.segment(chunk);
+                            for (var item of iterator) segments.push(item.segment);
+                        } else {
+                            var tempArr = chunk.split('');
+                            for(var a=0; a<tempArr.length; a++) segments.push(tempArr[a]);
+                        }
+                    }
+                }
+
+                // 代词倒装算法
+                if (pInversion > 0) {
+                    for (var i = 0; i < segments.length; i++) {
+                        var w = segments[i].trim();
+                        if (w && !/^__Q\d+__$/.test(w) && pronounsDict.indexOf(w) !== -1) {
+                            if (Math.random() < pInversion) {
+                                var insertPos = i;
+                                while (insertPos < segments.length - 1 && segments[insertPos + 1].trim() !== '') {
+                                    insertPos++;
+                                }
+                                if (insertPos > i) {
+                                    var pronoun = segments.splice(i, 1)[0];
+                                    segments.splice(insertPos, 0, pronoun);
+                                    i--; 
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 局部错位算法
+                if (pSwap > 0) {
+                    for (var j = 0; j < segments.length - 1; j++) {
+                        var w1 = segments[j].trim();
+                        var w2 = segments[j+1].trim();
+                        // 确保不和空格交换
+                        if (w1 !== '' && w2 !== '') {
+                            var isM1 = w1 && !/^__Q\d+__$/.test(w1) && mortarDict.indexOf(w1) !== -1;
+                            var isM2 = w2 && !/^__Q\d+__$/.test(w2) && mortarDict.indexOf(w2) !== -1;
+                            if (isM1 || isM2) {
+                                if (Math.random() < pSwap) {
+                                    var temp = segments[j];
+                                    segments[j] = segments[j+1];
+                                    segments[j+1] = temp;
+                                    j++; 
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 恢复引号
+                var finalResult = segments.join('');
+                finalResult = finalResult.replace(/__Q(\d+)__/g, function(match, index) {
+                    return protectedQuotes[index];
+                });
+
+                // 删去多余空格
+                finalResult = finalResult.replace(/\s{2,}/g, ' ').trim(); 
+
+                // 错误断句算法
+                if (pBreak > 0) {
+                    var chars = Array.from(finalResult); 
+                    for (var k = 1; k < chars.length - 1; k++) {
+                        if (chars[k] === ' ' && chars[k-1] !== ' ' && chars[k+1] !== ' ') {
+                            if (Math.random() < pBreak) {
+                                var direction = Math.random() < 0.5 ? -1 : 1;
+                                
+                                var tempChar = chars[k];
+                                chars[k] = chars[k + direction];
+                                chars[k + direction] = tempChar;
+                                
+                                if (direction === 1) {
+                                    k++;
+                                }
+                            }
+                        }
+                    }
+                    finalResult = chars.join('');
+                }
+                
+                document.getElementById('outputText').innerText = finalResult;
+            };
+        })();
+    </script>
+</body>
+</html>
