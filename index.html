@@ -195,7 +195,7 @@
                         if (w && !/^__Q\d+__$/.test(w) && pronounsDict.indexOf(w) !== -1) {
                             if (Math.random() < pInversion) {
                                 var insertPos = i;
-                                while (insertPos < segments.length - 1 && segments[insertPos + 1].trim() !== '') {
+                                while (insertPos < segments.length - 1 && segments[insertPos + 1].trim() !== '' && segments[insertPos + 1].trim() !== '…') {
                                     insertPos++;
                                 }
                                 if (insertPos > i) {
@@ -213,8 +213,7 @@
                     for (var j = 0; j < segments.length - 1; j++) {
                         var w1 = segments[j].trim();
                         var w2 = segments[j+1].trim();
-                        // 确保不和空格交换
-                        if (w1 !== '' && w2 !== '') {
+                        if (w1 !== '' && w2 !== '' && w1 !=='…' && w2 !== '…') {
                             var isM1 = w1 && !/^__Q\d+__$/.test(w1) && mortarDict.indexOf(w1) !== -1;
                             var isM2 = w2 && !/^__Q\d+__$/.test(w2) && mortarDict.indexOf(w2) !== -1;
                             if (isM1 || isM2) {
